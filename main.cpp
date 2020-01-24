@@ -1,7 +1,17 @@
-#include <iostream>
+#include "Executable.h"
 
-int main()
+int main(int argc,  char **argv)
 {
-    std::cout << "Hello, World!" << std::endl;
+    if(argc>1)
+    {
+        std::string filename=argv[1];
+
+        Executable executable(filename);
+    }
+    else
+    {
+        std::cout << "No executable provided."<< std::endl;
+    }
+
     return 0;
 }
