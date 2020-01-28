@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "COFFHeader.h"
+#include "OptionalHeaderStandardFields.h"
 
 class Executable
 {
@@ -21,6 +22,7 @@ private:
     long mPESignatureOffset=0;
     char mPESignature[5]={};//Add extra character so we'll always have a null terminator.
     COFFHeader mCOFFHeader={};
+    OptionalHeaderStandardFields mOptionalHeaderStandardFields={};
 
     //ELF
 
