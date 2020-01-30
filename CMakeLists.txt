@@ -3,4 +3,4 @@ project(RunIt)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(RunIt main.cpp Executable.cpp Executable.h COFFHeader.h OptionalHeaderStandardFields.h)
+add_executable(RunIt main.cpp Executable.cpp Executable.h COFFHeader.h OptionalHeaderStandardFields.h OptionalHeaderWindowsSpecificFields.h)
