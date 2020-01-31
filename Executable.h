@@ -17,6 +17,8 @@
 #include "COFFHeader.h"
 #include "OptionalHeaderStandardFields.h"
 #include "OptionalHeaderWindowsSpecificFields.h"
+#include "OptionalHeaderDataDirectories.h"
+#include "SectionHeader.h"
 
 class Executable
 {
@@ -30,6 +32,8 @@ private:
     OptionalHeaderStandardFields mOptionalHeaderStandardFields={};
     PE32OptionalHeaderWindowsSpecificFields mPE32OptionalHeaderWindowsSpecificFields={};
     PE32PlusOptionalHeaderWindowsSpecificFields mPE32PlusOptionalHeaderWindowsSpecificFields={};
+    OptionalHeaderDataDirectories mOptionalHeaderDataDirectories={};
+    std::vector<SectionHeader> mSectionHeaders;
 
     //ELF
 

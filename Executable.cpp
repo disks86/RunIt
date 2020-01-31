@@ -38,6 +38,7 @@ void Executable::LoadPE()
     time_t time = mCOFFHeader.TimeDateStamp;
     auto timeDateStamp = localtime(reinterpret_cast<const time_t *>(&time));
 
+    std::cout << std::endl;
     std::cout << "--- COFF File Header ---" << std::endl;
     mInputFile.read ((char*)&mCOFFHeader, sizeof(COFFHeader));
     std::cout << "Machine: " << ToString(mCOFFHeader.Machine) << std::endl;
@@ -49,6 +50,7 @@ void Executable::LoadPE()
     std::cout << "Characteristics: " << mCOFFHeader.Characteristics << std::endl;
 
     //Optional Header Standard Fields
+    std::cout << std::endl;
     std::cout << "--- Optional Header Standard Fields  ---" << std::endl;
     mInputFile.read ((char*)&mOptionalHeaderStandardFields, sizeof(OptionalHeaderStandardFields)-4);
     if(mOptionalHeaderStandardFields.Magic == PE32)
@@ -69,6 +71,7 @@ void Executable::LoadPE()
     }
 
     //Optional Header Windows-Specific Fields
+    std::cout << std::endl;
     std::cout << "--- Optional Header Windows-Specific Fields  ---" << std::endl;
     if(mOptionalHeaderStandardFields.Magic == PE32)
     {
@@ -95,6 +98,8 @@ void Executable::LoadPE()
         std::cout << "SizeOfHeapCommit: " << mPE32OptionalHeaderWindowsSpecificFields.SizeOfHeapCommit << std::endl;
         std::cout << "LoaderFlags: " << mPE32OptionalHeaderWindowsSpecificFields.LoaderFlags << std::endl;
         std::cout << "NumberOfRvaAndSizes: " << mPE32OptionalHeaderWindowsSpecificFields.NumberOfRvaAndSizes << std::endl;
+
+        mInputFile.read ((char*)&mOptionalHeaderDataDirectories, mPE32OptionalHeaderWindowsSpecificFields.NumberOfRvaAndSizes * sizeof(HeaderDataDirectory));
     }
     else
     {
@@ -121,6 +126,81 @@ void Executable::LoadPE()
         std::cout << "SizeOfHeapCommit: " << mPE32PlusOptionalHeaderWindowsSpecificFields.SizeOfHeapCommit << std::endl;
         std::cout << "LoaderFlags: " << mPE32PlusOptionalHeaderWindowsSpecificFields.LoaderFlags << std::endl;
         std::cout << "NumberOfRvaAndSizes: " << mPE32PlusOptionalHeaderWindowsSpecificFields.NumberOfRvaAndSizes << std::endl;
+
+        mInputFile.read ((char*)&mOptionalHeaderDataDirectories, mPE32PlusOptionalHeaderWindowsSpecificFields.NumberOfRvaAndSizes * sizeof(HeaderDataDirectory));
+    }
+
+    //Optional Header Data Directories
+    std::cout << std::endl;
+    std::cout << "--- Optional Header Data Directories  ---" << std::endl;
+    std::cout << "ExportTable: "
+        << mOptionalHeaderDataDirectories.ExportTable.VirtualAddress << "(VirtualAddress) "
+        << mOptionalHeaderDataDirectories.ExportTable.Size << "(Size)" << std::endl;
+    std::cout << "ImportTable: "
+              << mOptionalHeaderDataDirectories.ImportTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.ImportTable.Size << "(Size)" << std::endl;
+    std::cout << "ResourceTable: "
+              << mOptionalHeaderDataDirectories.ResourceTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.ResourceTable.Size << "(Size)" << std::endl;
+    std::cout << "ExceptionTable: "
+              << mOptionalHeaderDataDirectories.ExceptionTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.ExceptionTable.Size << "(Size)" << std::endl;
+    std::cout << "CertificateTable: "
+              << mOptionalHeaderDataDirectories.CertificateTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.CertificateTable.Size << "(Size)" << std::endl;
+    std::cout << "BaseRelocationTable: "
+              << mOptionalHeaderDataDirectories.BaseRelocationTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.BaseRelocationTable.Size << "(Size)" << std::endl;
+    std::cout << "Debug: "
+              << mOptionalHeaderDataDirectories.Debug.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.Debug.Size << "(Size)" << std::endl;
+    std::cout << "Architecture: "
+              << mOptionalHeaderDataDirectories.Architecture.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.Architecture.Size << "(Size)" << std::endl;
+    std::cout << "GlobalPointer: "
+              << mOptionalHeaderDataDirectories.GlobalPointer.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.GlobalPointer.Size << "(Size)" << std::endl;
+    std::cout << "TlsTable: "
+              << mOptionalHeaderDataDirectories.TlsTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.TlsTable.Size << "(Size)" << std::endl;
+    std::cout << "LoadConfigTable: "
+              << mOptionalHeaderDataDirectories.LoadConfigTable.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.LoadConfigTable.Size << "(Size)" << std::endl;
+    std::cout << "BoundImport: "
+              << mOptionalHeaderDataDirectories.BoundImport.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.BoundImport.Size << "(Size)" << std::endl;
+    std::cout << "Iat: "
+              << mOptionalHeaderDataDirectories.Iat.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.Iat.Size << "(Size)" << std::endl;
+    std::cout << "DelayImportDescriptor: "
+              << mOptionalHeaderDataDirectories.DelayImportDescriptor.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.DelayImportDescriptor.Size << "(Size)" << std::endl;
+    std::cout << "ClrRuntimeHeader: "
+              << mOptionalHeaderDataDirectories.ClrRuntimeHeader.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.ClrRuntimeHeader.Size << "(Size)" << std::endl;
+    std::cout << "Reserved: "
+              << mOptionalHeaderDataDirectories.Reserved.VirtualAddress << "(VirtualAddress) "
+              << mOptionalHeaderDataDirectories.Reserved.Size << "(Size)" << std::endl;
+
+    //Section Table
+    std::cout << std::endl;
+    std::cout << "--- Section Table  ---" << std::endl;
+    mSectionHeaders.resize(mCOFFHeader.NumberOfSections);
+    mInputFile.read ((char*)mSectionHeaders.data(), mCOFFHeader.NumberOfSections*sizeof(SectionHeader));
+
+    for(const auto& header : mSectionHeaders)
+    {
+        std::cout << std::endl;
+        std::cout << "Name: " << header.Name << std::endl;
+        std::cout << "VirtualSize: " << header.VirtualSize << std::endl;
+        std::cout << "VirtualAddress: " << header.VirtualAddress << std::endl;
+        std::cout << "SizeOfRawData: " << header.SizeOfRawData << std::endl;
+        std::cout << "PointerToRawData: " << header.PointerToRawData << std::endl;
+        std::cout << "PointerToRelocations: " << header.PointerToRelocations << std::endl;
+        std::cout << "PointerToLinenumbers: " << header.PointerToLinenumbers << std::endl;
+        std::cout << "NumberOfRelocations: " << header.NumberOfRelocations << std::endl;
+        std::cout << "NumberOfLinenumbers: " << header.NumberOfLinenumbers << std::endl;
+        std::cout << "Characteristics: " << header.Characteristics << std::endl;
     }
 }
 
