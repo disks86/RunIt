@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <map>
 #include <variant>
 #include <chrono>
 #include <ctime>
@@ -19,11 +20,14 @@
 #include "OptionalHeaderWindowsSpecificFields.h"
 #include "OptionalHeaderDataDirectories.h"
 #include "SectionHeader.h"
+#include "CodeAllocator.h"
 
 class Executable
 {
 private:
     std::ifstream mInputFile;
+    std::vector<char> mBuffer;
+    std::map<uint64_t,std::vector<char,CodeAllocator<char>>> mCodeBlocks;
 
     //PE
     long mPESignatureOffset=0;
@@ -43,6 +47,7 @@ public:
     Executable(std::string& filename);
     void LoadPE();
     void LoadElf();
+    void StartReadingTokens(char* entryPoint);
 };
 
 

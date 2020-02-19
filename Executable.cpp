@@ -8,14 +8,20 @@ Executable::Executable(std::string& filename)
 {
     std::cout << "Opening: " << filename << std::endl;
     mInputFile.open(filename,std::ios::in | std::ios::binary);
-
-    if(filename.ends_with("exe") || filename.ends_with("EXE"))
+    std::streamsize size = mInputFile.tellg();
+    mInputFile.seekg(0, std::ios::beg);
+    std::cout << "Loading into memory: " << filename << std::endl;
+    if (mInputFile.read(mBuffer.data(), size))
     {
-        LoadPE();
-    }
-    else
-    {
-        LoadElf();
+        mInputFile.seekg(0, std::ios::beg);
+        if(filename.ends_with("exe") || filename.ends_with("EXE"))
+        {
+            LoadPE();
+        }
+        else
+        {
+            LoadElf();
+        }
     }
 }
 
@@ -202,10 +208,24 @@ void Executable::LoadPE()
         std::cout << "NumberOfLinenumbers: " << header.NumberOfLinenumbers << std::endl;
         std::cout << "Characteristics: " << header.Characteristics << std::endl;
     }
+
+    if(mOptionalHeaderStandardFields.Magic == PE32)
+    {
+        StartReadingTokens(mBuffer.data() + mPE32OptionalHeaderWindowsSpecificFields.ImageBase);
+    }
+    else
+    {
+        StartReadingTokens(mBuffer.data() + mPE32PlusOptionalHeaderWindowsSpecificFields.ImageBase);
+    }
 }
 
 void Executable::LoadElf()
 {
     std::cout << "ELF not supported!" << std::endl;
     abort();
+}
+
+void Executable::StartReadingTokens(char* entryPoint)
+{
+    //https://securityxploded.com/memory-execution-of-executable.php
 }
